@@ -1,31 +1,30 @@
-import React, { useState, useMemo } from 'react';
-import { Search, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import React, { useState, useMemo } from "react";
+import { Search, ChevronLeft, ChevronRight, Filter } from "lucide-react";
 
 const PacketTable = ({ packets }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [protocolFilter, setProtocolFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [protocolFilter, setProtocolFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 50;
 
   // Get unique protocols for filter
   const protocols = useMemo(() => {
-    const unique = new Set(packets.map(p => p.Protocol));
-    return ['all', ...Array.from(unique)].sort();
+    const unique = new Set(packets.map((p) => p.Protocol));
+    return ["all", ...Array.from(unique)].sort();
   }, [packets]);
 
   // Filter packets
   const filteredPackets = useMemo(() => {
-    return packets.filter(packet => {
-      const matchesSearch = 
-        searchTerm === '' ||
-        Object.values(packet).some(val => 
-          String(val).toLowerCase().includes(searchTerm.toLowerCase())
+    return packets.filter((packet) => {
+      const matchesSearch =
+        searchTerm === "" ||
+        Object.values(packet).some((val) =>
+          String(val).toLowerCase().includes(searchTerm.toLowerCase()),
         );
-      
-      const matchesProtocol = 
-        protocolFilter === 'all' || 
-        packet.Protocol === protocolFilter;
-      
+
+      const matchesProtocol =
+        protocolFilter === "all" || packet.Protocol === protocolFilter;
+
       return matchesSearch && matchesProtocol;
     });
   }, [packets, searchTerm, protocolFilter]);
@@ -39,17 +38,17 @@ const PacketTable = ({ packets }) => {
   // Protocol color coding
   const getProtocolColor = (protocol) => {
     const colors = {
-      TCP: 'bg-blue-100 text-blue-800',
-      UDP: 'bg-green-100 text-green-800',
-      DNS: 'bg-purple-100 text-purple-800',
-      HTTP: 'bg-orange-100 text-orange-800',
-      HTTPS: 'bg-red-100 text-red-800',
-      ICMP: 'bg-yellow-100 text-yellow-800',
-      ICMPv6: 'bg-yellow-100 text-yellow-800',
-      ARP: 'bg-pink-100 text-pink-800',
-      IPv6: 'bg-indigo-100 text-indigo-800'
+      TCP: "bg-blue-100 text-blue-800",
+      UDP: "bg-green-100 text-green-800",
+      DNS: "bg-purple-100 text-purple-800",
+      HTTP: "bg-orange-100 text-orange-800",
+      HTTPS: "bg-red-100 text-red-800",
+      ICMP: "bg-yellow-100 text-yellow-800",
+      ICMPv6: "bg-yellow-100 text-yellow-800",
+      ARP: "bg-pink-100 text-pink-800",
+      IPv6: "bg-indigo-100 text-indigo-800",
     };
-    return colors[protocol] || 'bg-gray-100 text-gray-800';
+    return colors[protocol] || "bg-gray-100 text-gray-800";
   };
 
   const handlePageChange = (newPage) => {
@@ -75,7 +74,7 @@ const PacketTable = ({ packets }) => {
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
-        
+
         <div className="relative">
           <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
           <select
@@ -86,9 +85,9 @@ const PacketTable = ({ packets }) => {
             }}
             className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
           >
-            {protocols.map(protocol => (
+            {protocols.map((protocol) => (
               <option key={protocol} value={protocol}>
-                {protocol === 'all' ? 'All Protocols' : protocol}
+                {protocol === "all" ? "All Protocols" : protocol}
               </option>
             ))}
           </select>
@@ -98,13 +97,14 @@ const PacketTable = ({ packets }) => {
       {/* Results Info */}
       <div className="flex items-center justify-between text-sm text-gray-600">
         <span>
-          Showing {startIndex + 1}-{Math.min(endIndex, filteredPackets.length)} of {filteredPackets.length} packets
+          Showing {startIndex + 1}-{Math.min(endIndex, filteredPackets.length)}{" "}
+          of {filteredPackets.length} packets
         </span>
-        {searchTerm || protocolFilter !== 'all' ? (
+        {searchTerm || protocolFilter !== "all" ? (
           <button
             onClick={() => {
-              setSearchTerm('');
-              setProtocolFilter('all');
+              setSearchTerm("");
+              setProtocolFilter("all");
               setCurrentPage(1);
             }}
             className="text-blue-600 hover:text-blue-800 font-medium"
@@ -151,7 +151,10 @@ const PacketTable = ({ packets }) => {
               </tr>
             ) : (
               currentPackets.map((packet, index) => (
-                <tr key={startIndex + index} className="hover:bg-gray-50 transition-colors">
+                <tr
+                  key={startIndex + index}
+                  className="hover:bg-gray-50 transition-colors"
+                >
                   <td className="px-4 py-3 whitespace-nowrap text-sm font-mono text-gray-600">
                     {packet.No}
                   </td>
@@ -165,7 +168,9 @@ const PacketTable = ({ packets }) => {
                     {packet.Destination}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getProtocolColor(packet.Protocol)}`}>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${getProtocolColor(packet.Protocol)}`}
+                    >
                       {packet.Protocol}
                     </span>
                   </td>
@@ -213,8 +218,8 @@ const PacketTable = ({ packets }) => {
                   onClick={() => handlePageChange(pageNum)}
                   className={`px-3 py-1 rounded-lg text-sm font-medium ${
                     currentPage === pageNum
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? "bg-blue-600 text-white"
+                      : "text-gray-700 hover:bg-gray-100"
                   }`}
                 >
                   {pageNum}

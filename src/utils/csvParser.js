@@ -1,4 +1,4 @@
-import Papa from 'papaparse';
+import Papa from "papaparse";
 
 /**
  * Parse Wireshark CSV export file
@@ -10,17 +10,17 @@ export const parseWiresharkCSV = (csvText) => {
     header: true,
     skipEmptyLines: true,
     dynamicTyping: true,
-    transformHeader: (header) => header.trim().replace(/"/g, '')
+    transformHeader: (header) => header.trim().replace(/"/g, ""),
   });
 
   if (result.errors.length > 0) {
-    console.error('CSV parsing errors:', result.errors);
+    console.error("CSV parsing errors:", result.errors);
   }
 
   return {
     packets: result.data,
     meta: result.meta,
-    errors: result.errors
+    errors: result.errors,
   };
 };
 
@@ -37,21 +37,22 @@ export const extractStatistics = (packets) => {
     destinations: {},
     timeRange: { start: null, end: null },
     avgPacketSize: 0,
-    totalBytes: 0
+    totalBytes: 0,
   };
 
   packets.forEach((packet) => {
     // Count protocols
-    const protocol = packet.Protocol || 'Unknown';
+    const protocol = packet.Protocol || "Unknown";
     stats.protocols[protocol] = (stats.protocols[protocol] || 0) + 1;
 
     // Count sources
-    const source = packet.Source || 'Unknown';
+    const source = packet.Source || "Unknown";
     stats.sources[source] = (stats.sources[source] || 0) + 1;
 
     // Count destinations
-    const destination = packet.Destination || 'Unknown';
-    stats.destinations[destination] = (stats.destinations[destination] || 0) + 1;
+    const destination = packet.Destination || "Unknown";
+    stats.destinations[destination] =
+      (stats.destinations[destination] || 0) + 1;
 
     // Calculate bytes
     const length = parseInt(packet.Length) || 0;
@@ -67,9 +68,10 @@ export const extractStatistics = (packets) => {
     }
   });
 
-  stats.avgPacketSize = stats.totalPackets > 0 
-    ? Math.round(stats.totalBytes / stats.totalPackets) 
-    : 0;
+  stats.avgPacketSize =
+    stats.totalPackets > 0
+      ? Math.round(stats.totalBytes / stats.totalPackets)
+      : 0;
 
   return stats;
 };
@@ -81,7 +83,7 @@ export const extractStatistics = (packets) => {
  * @returns {Array} Filtered packets
  */
 export const filterByProtocol = (packets, protocol) => {
-  return packets.filter(p => p.Protocol === protocol);
+  return packets.filter((p) => p.Protocol === protocol);
 };
 
 /**
@@ -92,7 +94,7 @@ export const filterByProtocol = (packets, protocol) => {
  */
 export const filterByIP = (packets, ipAddress) => {
   return packets.filter(
-    p => p.Source === ipAddress || p.Destination === ipAddress
+    (p) => p.Source === ipAddress || p.Destination === ipAddress,
   );
 };
 
@@ -105,13 +107,13 @@ export const groupByConnection = (packets) => {
   const connections = {};
 
   packets.forEach((packet) => {
-    const info = packet.Info || '';
+    const info = packet.Info || "";
     const portMatch = info.match(/(\d+)\s*>\s*(\d+)/);
-    
+
     if (portMatch) {
       const [, srcPort, dstPort] = portMatch;
       const key = `${packet.Source}:${srcPort} -> ${packet.Destination}:${dstPort}`;
-      
+
       if (!connections[key]) {
         connections[key] = {
           source: packet.Source,
@@ -119,10 +121,10 @@ export const groupByConnection = (packets) => {
           destination: packet.Destination,
           dstPort,
           packets: [],
-          totalBytes: 0
+          totalBytes: 0,
         };
       }
-      
+
       connections[key].packets.push(packet);
       connections[key].totalBytes += parseInt(packet.Length) || 0;
     }
@@ -140,38 +142,41 @@ export const detectConnectionIssues = (packets) => {
   const issues = [];
 
   packets.forEach((packet, index) => {
-    const info = packet.Info || '';
-    
-    if (info.includes('Retransmission')) {
+    const info = packet.Info || "";
+
+    if (info.includes("Retransmission")) {
       issues.push({
         packetNo: packet.No,
-        type: 'TCP Retransmission',
+        type: "TCP Retransmission",
         source: packet.Source,
         destination: packet.Destination,
         time: packet.Time,
-        description: 'Packet was retransmitted, indicating possible network congestion or packet loss'
+        description:
+          "Packet was retransmitted, indicating possible network congestion or packet loss",
       });
     }
-    
-    if (info.includes('[RST')) {
+
+    if (info.includes("[RST")) {
       issues.push({
         packetNo: packet.No,
-        type: 'TCP Reset',
+        type: "TCP Reset",
         source: packet.Source,
         destination: packet.Destination,
         time: packet.Time,
-        description: 'Connection was reset, possibly due to application error or firewall'
+        description:
+          "Connection was reset, possibly due to application error or firewall",
       });
     }
-    
-    if (info.includes('Dup ACK')) {
+
+    if (info.includes("Dup ACK")) {
       issues.push({
         packetNo: packet.No,
-        type: 'Duplicate ACK',
+        type: "Duplicate ACK",
         source: packet.Source,
         destination: packet.Destination,
         time: packet.Time,
-        description: 'Duplicate acknowledgment received, indicating missing packets'
+        description:
+          "Duplicate acknowledgment received, indicating missing packets",
       });
     }
   });
@@ -185,5 +190,5 @@ export default {
   filterByProtocol,
   filterByIP,
   groupByConnection,
-  detectConnectionIssues
+  detectConnectionIssues,
 };
